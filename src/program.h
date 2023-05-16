@@ -9,7 +9,7 @@ enum errors {
 };
 
 
-char *input(char *delim);
+char *input(char *delim, char *user, char *dir);
 int check(char *path, char *result, char delim);
 char *process(char *path, const char delim);
 void output(char *path);
