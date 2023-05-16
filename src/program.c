@@ -1,74 +1,85 @@
-#include "strings.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <pwd.h>
+
 #include "program.h"
+#include "strings.h"
 
-// Функция ввода данных
-void input(char *delim, char *dir, char *paths) {
-    printf("Введите разделитель: ");
-    scanf(" %c", delim);
-    
-    printf("Введите имя каталога: ");
-    scanf(" %s", dir);
-    
-    printf("Введите пути: ");
-    scanf(" %[^\n]", paths);
+char *input(char *delim) {
+  char *path = (char *)malloc(MAX_STRING);
+  printf("delim: ");
+  scanf("%c", delim);
+  printf("\npath: ");
+  scanf("%s", path);
+  printf("\n");
+  return path;
 }
 
-// Функция проверки корректности данных
-int check(const char *str) {
-    int length = slen(str);
-    
-    // Проверка длины входной строки
-    if (length > MAX_LENGTH) {
-        return ERROR_LENGTH;
-    }
-    
-    // Проверка символов во входной строке
-    for (int i = 0; i < length; i++) {
-        if (!sspn(&str[i], ALLOWED_CHARS)) {
-            return i;
+/*\	разделитель подкаталогов
+/	ключи командного интерпретатора
+:	отделяет букву диска в Windows-путях
+*	заменяющий символ (маска «любое количество любых символов»)
+?	заменяющий символ (маска «один любой символ»)
+«	используется для указания путей, содержащих пробелы
+<	обозначение перенаправления ввода
+>	обозначение перенаправления вывода
+|	обозначение программного конвейера*/
+int is_correct_symbol(char symbol) {
+  char symbols[] = ":*?«<>|\\";
+  for (size_t i = 0; i < slen(symbols); i++) {
+    if (symbols[i] == symbol)
+      return 1;
+  }
+  return 0;
+}
+
+int check(char *path, char *result, char delim) {
+    char *output[12];
+    int count = stok(path, delim, output);
+    for (int i = 0; i < count; i++) {
+        if (slen(output[i]) > MAX_PATH) {
+            scpy(result, output[i]);
+            scpy(&result[slen(output[i])], "\n^\nError, path is too long");
+            return Error_Length;
+        }
+        else if (output[i][0] != '~' && output[i][0] != '/') { // Добавлено условие для символа '~'
+            scpy(result, output[i]);
+            scpy(&result[slen(output[i])], "\n^\nError, expected '/'");
+            return Error_String;
         }
     }
-    
-    return NO_ERROR;
-}
-
-// Функция обработки данных
-void process(char delim, const char *dir, char *paths) {
-    char *token;
-    char *path = paths;
-    
-    while ((token = stok(path, delim, &path, MAX_TOKENS)) != NULL) {
-        if (token[0] == '~') {
-            char absolutePath[MAX_LENGTH];
-            scpy(dir, absolutePath);
-            scpy(&token[1], &absolutePath[slen(dir)]);
-            printf("%s%c", absolutePath, delim);
-        } else {
-            printf("%s%c", token, delim);
+    for (size_t i = 0; i < slen(path); i++) {
+        if (is_correct_symbol(path[i])) {
+            scpy(result, &path[i]);
+            scpy(&result[slen(&path[i])], "\n^\nError, unresolved symbol - ':*?«<>|\\'");
+            return Error_Symbol;
         }
     }
-}
-
-// Функция вывода данных
-void output(const char *paths) {
-    printf("new paths: %s\n", paths);
-}
-
-int main() {
-    char delim;
-    char dir[MAX_LENGTH];
-    char paths[MAX_LENGTH];
-    
-    input(&delim, dir, paths);
-    
-    int errorPos = check(paths);
-    
-    if (errorPos == NO_ERROR) {
-        process(delim, dir, paths);
-        output(paths);
-    } else {
-        printf("Ошибка: недопустимый символ в позиции %d\n", errorPos);
-    }
-    
+    santok(path, delim, output, count);
     return 0;
 }
+
+/*delim: +
+paths:
+/cygdrive/c/Windows/system32+/cygdrive/e/Distrib/msoffice.exe+/home/alex/prog/lab4.c
+Выход:
+new paths: C:\Windows\system32+E:\Distrib\msoffice.exe+/home/alex/prog/lab4.c*/
+char *process(char *path, const char delim) {
+  char *result = (char *)malloc(MAX_STRING);
+  char *output[12];
+  int count = stok(path, delim, output);
+  for (int i = 0; i < count; i++) {
+    if (output[i][0] == '~') {
+      // Получаем домашний каталог текущего пользователя
+      const char *home = getenv("HOME");
+      if (home != NULL) {
+        // Заменяем символ '~' на домашний каталог
+        replace(output[i], "~/", (const char *)home);
+      }
+    }
+  }
+  return santok(result, delim, output, count);
+}
+
+void output(char *path) { printf("%s\n\n", path); }

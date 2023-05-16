@@ -1,12 +1,15 @@
 #pragma once
+#define MAX_PATH 260
+#define MAX_STRING 4096
 
-#define MAX_LENGTH 100
-#define MAX_TOKENS 10
-#define ALLOWED_CHARS "+/~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.:"
-#define NO_ERROR 0
-#define ERROR_LENGTH -1
+enum errors {
+  Error_Length = 1,
+  Error_Symbol,
+  Error_String,
+};
 
-void input(char *delim, char *dir, char *paths);
-int check(const char *str);
-void process(char delim, const char *dir, char *paths);
-void output(const char *paths);
+
+char *input(char *delim);
+int check(char *path, char *result, char delim);
+char *process(char *path, const char delim);
+void output(char *path);
