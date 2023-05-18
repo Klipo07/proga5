@@ -66,10 +66,6 @@ int main() {
     }
     santok(absPaths, delim, output, count);
 
-    // Изменение пути для начала с /
-    if (strncmp(absPaths, "/home/stud/games/packman.cpp", strlen("/home/stud/games/packman.cpp")) == 0) {
-        memmove(absPaths, absPaths + strlen("/home/stud/games"), strlen(absPaths));
-    }
     // Удаление /jack/
     char *jackPos = strstr(absPaths, "/jack/");
     if (jackPos != NULL) {
