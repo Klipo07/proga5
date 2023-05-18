@@ -4,7 +4,7 @@
 
 #include "program.h"
 
-/*  1  */
+//Функция вычисления длины строки
 size_t slen(const char *str) {
   size_t size = 0;
   while (str[size] != '\0') {
@@ -13,7 +13,7 @@ size_t slen(const char *str) {
   return size;
 }
 
-/*  2  */
+//Функция сравнения строк
 int scmp(char *first, char *second) {
   while (*first != '\0' || *second != '\0') {
     if (*first > *second)
@@ -39,7 +39,7 @@ int sncmp(const char *first, const char *second, size_t count) {
   return 0;
 }
 
-/*  3  */
+//Функция копирования строк
 char *scpy(char *toHere, const char *fromHere) {
   for (size_t i = 0; i <= slen(fromHere); i++) {
     toHere[i] = fromHere[i];
@@ -56,7 +56,7 @@ int is_symbol(char s1, const char *accept) {
   return 0;
 }
 
-/*  4  */
+//Функция проверки символа на принадлежность заданному множеству
 size_t sspn(char *s, const char *accept) {
   size_t size = 0;
   size_t counter = 0;
@@ -71,7 +71,7 @@ size_t sspn(char *s, const char *accept) {
   return size;
 }
 
-/*  5  */
+//Функция разбиения строки на токены разделенные заданным символом
 int stok(char *s, const char symbol, char *output[]) {
   int count = 0;
   output[count++] = s;
