@@ -28,25 +28,30 @@ int is_correct_symbol(char symbol) {
 int check(char *path, char *result, char delim) {
     char *output[12];
     int count = stok(path, delim, output);
+
     for (int i = 0; i < count; i++) {
         if (slen(output[i]) > MAX_PATH) {
             scpy(result, output[i]);
-            scpy(&result[slen(output[i])], "\n^\nError, path is too long");
-            return Error_Length;
+            scpy(&result[slen(output[i])], "\n^\nError: Path is too long.");
+            return 1;
         }
-        else if (output[i][0] != '~' && output[i][0] != '/') { // Добавлено условие для символа '~'
+        else if (output[i][0] != '~') {
             scpy(result, output[i]);
-            scpy(&result[slen(output[i])], "\n^\nError, expected '/'");
-            return Error_String;
+            scpy(&result[slen(output[i])], "\n^\nError: Expected '~'");
+            return 1;
         }
     }
-    for (size_t i = 0; i < slen(path); i++) {
-        if (is_correct_symbol(path[i])) {
-            scpy(result, &path[i]);
-            scpy(&result[slen(&path[i])], "\n^\nError, unresolved symbol - ':*?«<>|\\'");
-            return Error_Symbol;
+    
+    for (int i = 0; i < count; i++) {
+        for (size_t j = 0; j < slen(output[i]); j++) {
+            if (is_correct_symbol(output[i][j])) {
+                scpy(result, output[i]);
+                scpy(&result[slen(output[i])], "\n^\nError: Unresolved symbol - ':*?«<>|\\'");
+                return 1;
+            }
         }
     }
+
     santok(path, delim, output, count);
     return 0;
 }

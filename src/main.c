@@ -47,6 +47,11 @@ int main() {
     printf("paths: ");
     scanf(" %[^\n]", paths);
 
+    if (check(paths, result, delim)) {
+        output(result);
+        return 1;
+    }
+
     char absPaths[MAX_STRING];
     char *output[12];
     int count = stok(paths, delim, output);
