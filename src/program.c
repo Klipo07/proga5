@@ -32,19 +32,19 @@ int check(char *path, char *result, char delim) {
         if (slen(output[i]) > MAX_PATH) {
             scpy(result, output[i]);
             scpy(&result[slen(output[i])], "\n^\nError, path is too long");
-            return Error_Length;
+            return 1;
         }
         else if (output[i][0] != '~' && output[i][0] != '/') { // Добавлено условие для символа '~'
             scpy(result, output[i]);
             scpy(&result[slen(output[i])], "\n^\nError, expected '/'");
-            return Error_String;
+            return 1;
         }
     }
     for (size_t i = 0; i < slen(path); i++) {
         if (is_correct_symbol(path[i])) {
             scpy(result, &path[i]);
             scpy(&result[slen(&path[i])], "\n^\nError, unresolved symbol - ':*?«<>|\\'");
-            return Error_Symbol;
+            return 1;
         }
     }
     santok(path, delim, output, count);
